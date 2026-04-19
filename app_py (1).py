@@ -56,6 +56,9 @@ if uploaded_file:
 
     job_clean = {k: preprocess(v) for k,v in job_descriptions.items()}
 
+if model is None:
+    st.error("Model failed to load")
+    st.stop()
 resume_embedding = model.encode(resume_clean)
 
 job_embeddings = {
