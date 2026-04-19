@@ -52,7 +52,7 @@ if uploaded_file:
 
     job_clean = {k: preprocess(v) for k,v in job_descriptions.items()}
 
-   resume_embedding = model.encode(resume_clean)
+resume_embedding = model.encode(resume_clean)
 
 job_embeddings = {
     role: model.encode(desc)
