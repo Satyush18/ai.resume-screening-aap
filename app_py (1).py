@@ -7,8 +7,6 @@ Original file is located at
     https://colab.research.google.com/drive/1302Z0kQFGGhsUSr4-zh0h9T9noMibBBW
 """
 
-!pip install PyPDF2
-
 !pip install streamlit pyngrok
 
 import streamlit as st
