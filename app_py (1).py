@@ -60,3 +60,16 @@ if uploaded_file:
     st.subheader("Ranking")
     for i,(role, score) in enumerate(sorted_scores,1):
         st.write(f"{i}. {role} → {round(score*100,2)}%")
+best_role = sorted_scores[0][0]
+
+resume_words = set(resume_clean.split())
+job_words = set(job_clean[best_role].split())
+
+missing_skills = list(job_words - resume_words)[:5]
+
+st.subheader("Missing Skills")
+
+if missing_skills:
+    st.write(", ".join(missing_skills))
+else:
+    st.success("No missing skills ")
