@@ -14,8 +14,9 @@ st.markdown("---")
 
 import PyPDF2
 import re
-from sklearn.feature_extraction.text import TfidfVectorizer, ENGLISH_STOP_WORDS
 from sklearn.metrics.pairwise import cosine_similarity
+from sentence_transformers import SentenceTransformer
+model = SentenceTransformer('all-MiniLM-L6-v2')
 
 def extract_text(file):
     reader = PyPDF2.PdfReader(file)
@@ -51,49 +52,61 @@ if uploaded_file:
 
     job_clean = {k: preprocess(v) for k,v in job_descriptions.items()}
 
-    documents = [resume_clean] + list(job_clean.values())
-    vectorizer = TfidfVectorizer(ngram_range=(1,2))
-    tfidf_matrix = vectorizer.fit_transform(documents)
+   resume_embedding = model.encode(resume_clean)
 
-    scores = {}
+job_embeddings = {
+    role: model.encode(desc)
+    for role, desc in job_clean.items()
+}
 
-    for i, role in enumerate(job_clean.keys()):
-        score = cosine_similarity(tfidf_matrix[0], tfidf_matrix[i+1])[0][0]
-        scores[role] = score
+scores = {}
 
-    sorted_scores = sorted(scores.items(), key=lambda x: x[1], reverse=True)
+for role, emb in job_embeddings.items():
+    score = cosine_similarity([resume_embedding], [emb])[0][0]
+    scores[role] = score
+    sorted_scores = sorted(scores.items(), key=lambda x: x[1], reverse=True) 
+threshold = 0.4
 
-    st.header("Best Role")
+if len(sorted_scores) > 0 and sorted_scores[0][1] >= threshold:
+    best_role = sorted_scores[0][0]
+else:
+    best_role = None
 
-    if len(sorted_scores) > 0:
-        st.write(sorted_scores[0][0])
-    else:
-        st.write("No suitable role found")
-    st.write(" ")    
+st.header(" Best Role")
 
-    st.header("Ranking")
+if best_role:
+    st.success(best_role)
+else:
+    st.error(" No suitable role found")
+st.header("Top 3 Recommended Roles")
 
-    for i, (role, score) in enumerate(sorted_scores, 1):
-        st.write(f"{i}. {role} - {round(score*100,2)}%")
-    st.write(" ")    
+top_3 = sorted_scores[:3]
 
-    if len(sorted_scores) > 0:
-        best_role = sorted_scores[0][0]
-    else:
-        best_role = "No match found"
+for i, (role, score) in enumerate(top_3, 1):
+    st.write(f"{i}. {role} ({round(score*100,2)}%)")
+if best_role:
+    score_percent = sorted_scores[0][1] * 100
+    st.header("Resume Score")
+    st.metric("Match Score", f"{round(score_percent,2)}%")
 
-    resume_words = set(resume_clean.split())
+resume_words = set(resume_clean.split())
 
-    if best_role in job_clean:
-        job_words = set(job_clean[best_role].split())
-    else:
-        job_words = set()
+st.header("Ranking")
 
-    missing_skills = list(job_words - resume_words)[:5]
+for i, (role, score) in enumerate(sorted_scores, 1):
+    st.progress(min(score, 1.0))
+    st.write(f"{i}. {role} ({round(score*100,2)}%)")
 
-    st.header("Missing Skills")
+if best_role in job_clean:
+    job_words = set(job_clean[best_role].split())
+else:
+    job_words = set()
 
-    if missing_skills:
-        st.write(", ".join(missing_skills))
-    else:
-        st.success("No missing skills")
+missing_skills = list(job_words - resume_words)[:5]
+
+st.header("Missing Skills")
+
+if missing_skills:
+    st.warning(", ".join(missing_skills))
+else:
+    st.success("No missing skills ")
