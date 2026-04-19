@@ -51,34 +51,42 @@ if uploaded_file:
     tfidf_matrix = vectorizer.fit_transform(documents)
 
     scores = {}
+
     for i, role in enumerate(job_clean.keys()):
         score = cosine_similarity(tfidf_matrix[0], tfidf_matrix[i+1])[0][0]
         scores[role] = score
 
     sorted_scores = sorted(scores.items(), key=lambda x: x[1], reverse=True)
 
-st.subheader("Best Role")   
-if len(sorted_scores) > 0:
-    st.write(sorted_scores[0][0])
-else:
-    st.write("No suitable role found")
+    st.subheader("Best Role")
+
+    if len(sorted_scores) > 0:
+        st.write(sorted_scores[0][0])
+    else:
+        st.write("No suitable role found")
 
     st.subheader("Ranking")
-    for i,(role, score) in enumerate(sorted_scores,1):
-        st.write(f"{i}. {role} → {round(score*100,2)}%")
-if len(sorted_scores) > 0:
-    best_role = sorted_scores[0][0]
-else:
-    best_role = "No match found"
 
-resume_words = set(resume_clean.split())
-job_words = set(job_clean[best_role].split())
+    for i, (role, score) in enumerate(sorted_scores, 1):
+        st.write(f"{i}. {role} - {round(score*100,2)}%")
 
-missing_skills = list(job_words - resume_words)[:5]
+    if len(sorted_scores) > 0:
+        best_role = sorted_scores[0][0]
+    else:
+        best_role = "No match found"
 
-st.subheader("Missing Skills")
+    resume_words = set(resume_clean.split())
 
-if missing_skills:
-    st.write(", ".join(missing_skills))
-else:
-    st.success("No missing skills ")
+    if best_role in job_clean:
+        job_words = set(job_clean[best_role].split())
+    else:
+        job_words = set()
+
+    missing_skills = list(job_words - resume_words)[:5]
+
+    st.subheader("Missing Skills")
+
+    if missing_skills:
+        st.write(", ".join(missing_skills))
+    else:
+        st.success("No missing skills")
