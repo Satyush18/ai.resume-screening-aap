@@ -8,11 +8,9 @@ Original file is located at
 """
 
 import streamlit as st
-st.title("Resume Screening App")
 st.markdown("Created by: Satyush Mohapatra")
 st.markdown("---")
 
-upload_file = st.file_uploader("Upload Resume")
 import PyPDF2
 import re
 from sklearn.feature_extraction.text import TfidfVectorizer, ENGLISH_STOP_WORDS
