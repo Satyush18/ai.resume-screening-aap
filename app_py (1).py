@@ -56,8 +56,7 @@ if uploaded_file:
         scores[role] = score
 
     sorted_scores = sorted(scores.items(), key=lambda x: x[1], reverse=True)
-
-  st.subheader("Best Role")
+ st.subheader("Best Role")
 
 if len(sorted_scores) > 0:
     st.write(sorted_scores[0][0])
