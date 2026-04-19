@@ -32,9 +32,13 @@ def preprocess(text):
     return " ".join(words)
 
 job_descriptions = {
-    "Data Scientist": "python machine learning pandas numpy statistics data analysis",
-    "Web Developer": "html css javascript react node frontend backend web",
-    "ML Engineer": "python tensorflow pytorch nlp deployment"
+    "Data Scientist": "Python machine learning pandas numpy statistics",
+    "Web Developer": "HTML CSS JavaScript React Node",
+    "Android Developer": "Java Kotlin Android Studio",
+    "DevOps Engineer": "Docker Kubernetes AWS CI/CD",
+    "Cyber Security": "network security ethical hacking encryption",
+    "UI/UX Designer": "Figma wireframe prototyping design",
+    "General Professional": "communication teamwork problem solving leadership"
 }
 
 st.title("Resume Screening System")
