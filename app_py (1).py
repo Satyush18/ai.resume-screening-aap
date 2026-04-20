@@ -64,6 +64,7 @@ uploaded_file = st.file_uploader("Upload Resume", type=["pdf"])
 
 # ---------------- MAIN LOGIC ---------------- #
 if uploaded_file:
+
     resume_text = extract_text(uploaded_file)
 
     if not resume_text.strip():
@@ -76,6 +77,7 @@ if uploaded_file:
 
     job_clean = {k: preprocess(v) for k, v in SKILLS_DB.items()}
 
+    # AI embeddings
     if model is None:
         st.error("Model not loaded properly")
         st.stop()
@@ -85,33 +87,34 @@ if uploaded_file:
     except Exception as e:
         st.error(f"Encoding failed: {e}")
         st.stop()
-scores = {}
 
-for role, text in job_clean.items():
-    try:
-        job_embedding = model.encode(text)
-    except Exception as e:
-        st.error(f"Job encoding failed: {e}")
-        st.stop()
+    scores = {}
 
-    score = cosine_similarity([resume_embedding], [job_embedding])[0][0]
-    scores[role] = score
+    for role, text in job_clean.items():
+        try:
+            job_embedding = model.encode(text)
+        except Exception as e:
+            st.error(f"Job encoding failed: {e}")
+            st.stop()
 
-sorted_scores = sorted(scores.items(), key=lambda x: x[1], reverse=True)
+        score = cosine_similarity([resume_embedding], [job_embedding])[0][0]
+        scores[role] = score
 
-threshold = 0.3
+    sorted_scores = sorted(scores.items(), key=lambda x: x[1], reverse=True)
 
-if sorted_scores and sorted_scores[0][1] >= threshold:
-    best_role = sorted_scores[0][0]
-else:
-    best_role = None
+    threshold = 0.3
+
+    if sorted_scores and sorted_scores[0][1] >= threshold:
+        best_role = sorted_scores[0][0]
+    else:
+        best_role = None
 
     st.header("Best Role")
 
     if best_role:
-        st.success(best_role)
+        st.success(f"Best match: {best_role}")
     else:
-        st.error("No suitable role found")
+        st.warning("No strong match found")
 
     # ---------------- TOP 3 ROLES ---------------- #
     st.header("Top 3 Recommended Roles")
