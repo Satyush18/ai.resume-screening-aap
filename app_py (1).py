@@ -16,8 +16,11 @@ import PyPDF2
 import re
 from sklearn.metrics.pairwise import cosine_similarity
 from sentence_transformers import SentenceTransformer
-model = SentenceTransformer('all-MiniLM-L6-v2')
+@st.cache_resource
+def load_model():
+    return SentenceTransformer('all-MiniLM-L6-v2')
 
+model = load_model()
 def extract_text(file):
     reader = PyPDF2.PdfReader(file)
     text = ""
@@ -68,9 +71,12 @@ if uploaded_file:
 
     job_clean = {k: preprocess(v) for k, v in SKILLS_DB.items()}
 
-    # TF-IDF
   # AI-based embeddings
-resume_embedding = model.encode(resume_clean)
+if 'model' in globals():
+    resume_embedding = model.encode(resume_clean)
+else:
+    st.error("Model not loaded properly")
+    st.stop()
 
 scores = {}
 
