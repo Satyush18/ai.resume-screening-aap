@@ -14,6 +14,7 @@ st.markdown("---")
 
 import PyPDF2
 import re
+from sklearn.feature_extraction.text import Tfidfvectorizer, ENGLISH_STOP_WORDS
 from sklearn.metrics.pairwise import cosine_similarity
 
 def extract_text(file):
