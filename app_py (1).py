@@ -76,16 +76,15 @@ if uploaded_file:
 
     job_clean = {k: preprocess(v) for k, v in SKILLS_DB.items()}
 
-  # AI-based embeddings
-if model is None:
-    st.error("Model not loaded properly")
-    st.stop()
+    if model is None:
+        st.error("Model not loaded properly")
+        st.stop()
 
-try:
-    resume_embedding = model.encode(resume_clean)
-except Exception as e:
-    st.error(f"Encoding failed: {e}")
-    st.stop()
+    try:
+        resume_embedding = model.encode(resume_clean)
+    except Exception as e:
+        st.error(f"Encoding failed: {e}")
+        st.stop()
 scores = {}
 
 for role, text in job_clean.items():
