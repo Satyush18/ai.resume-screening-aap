@@ -4,4 +4,4 @@ scikit-learn
 numpy
 pandas
 sentence-transformers
-
+torch
