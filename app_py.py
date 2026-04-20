@@ -128,6 +128,16 @@ if uploaded_file:
         st.success(f"Best match: {best_role}")
     else:
         st.warning("No strong match found")
+    # ---------------- RESUME SCORE ----------------
+   if best_role:
+        raw_score = sorted_scores[0][1]
+
+    # normalize (-1 to 1 → 0 to 1)
+        normalized_score = (raw_score + 1) / 2
+        score_percent = normalized_score * 100
+
+        st.header("Resume Score")
+        st.info(f"Match Score: {round(score_percent, 2)}%")   
 
     # ------------------ TOP 3 ------------------
     st.header("Top 3 Recommended Roles")
