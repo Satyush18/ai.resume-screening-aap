@@ -27,10 +27,24 @@ def extract_text(file):
 
 def preprocess(text):
     text = text.lower()
-    text = re.sub(r'[^a-z\s]', ' ', text)
-    words = text.split()
-    return " ".join(words)
 
+    # remove symbols
+    text = re.sub(r'[^a-z\s]', ' ', text)
+
+    # remove extra spaces
+    text = re.sub(r'\s+', ' ', text)
+
+    # normalize tech terms
+    text = text.replace("nodejs", "node")
+    text = text.replace("reactjs", "react")
+
+    # split words
+    words = text.split()
+
+    # ❗ remove garbage words (IMPORTANT)
+    words = [w for w in words if len(w) > 2]
+
+    return " ".join(words)
 job_descriptions = {
     "Data Scientist": "Python machine learning pandas numpy statistics",
     "Web Developer": "HTML CSS JavaScript React Node",
