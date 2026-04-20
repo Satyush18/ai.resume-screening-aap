@@ -16,6 +16,15 @@ import PyPDF2
 import re
 from sklearn.metrics.pairwise import cosine_similarity
 from sentence_transformers import SentenceTransformer
+SKILLS_DB = {
+    "Data Scientist": ["python", "machine learning", "pandas", "numpy", "statistics"],
+    "Web Developer": ["html", "css", "javascript", "react", "node"],
+    "Android Developer": ["java", "kotlin", "android", "firebase"],
+    "DevOps Engineer": ["docker", "kubernetes", "aws", "ci/cd"],
+    "Cyber Security": ["network security", "penetration testing", "encryption"],
+    "UI/UX Designer": ["figma", "wireframe", "prototyping", "design"],
+    "General Professional": ["communication", "teamwork", "leadership"]
+}
 @st.cache_resource
 def load_model():
     try:
@@ -49,15 +58,7 @@ def preprocess(text):
     words = [w for w in words if len(w) > 2]
 
     return " ".join(words)
-SKILLS_DB = {
-    "Data Scientist": ["python", "machine learning", "pandas", "numpy", "statistics"],
-    "Web Developer": ["html", "css", "javascript", "react", "node"],
-    "Android Developer": ["java", "kotlin", "android", "firebase"],
-    "DevOps Engineer": ["docker", "kubernetes", "aws", "ci/cd"],
-    "Cyber Security": ["network security", "penetration testing", "encryption"],
-    "UI/UX Designer": ["figma", "wireframe", "prototyping", "design"],
-    "General Professional": ["communication", "teamwork", "leadership"]
-}
+
 st.title("Resume Screening System")
 
 uploaded_file = st.file_uploader("Upload Resume", type=["pdf"])
