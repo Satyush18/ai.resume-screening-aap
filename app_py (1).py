@@ -41,10 +41,14 @@ job_descriptions = {
 }
 
 st.title("Resume Screening System")
-uploaded_file = st.file_uploader("Upload Resume", type=["pdf"], key="resume_upload")
+
+uploaded_file = st.file_uploader("Upload Resume", type=["pdf"])
+
+# ---------------- MAIN LOGIC ---------------- #
 if uploaded_file:
 
-    resume_text = extract_text(uploaded_file)
+    # Dummy text extraction (replace later with PDF parser)
+    resume_text = uploaded_file.read().decode("latin-1", errors="ignore")
 
     if not resume_text:
         st.error("Could not read resume")
@@ -54,9 +58,10 @@ if uploaded_file:
 
     job_clean = {k: preprocess(v) for k, v in job_descriptions.items()}
 
-    documents = [str(resume_clean)] + [str(v) for v in job_clean.values()]
+    documents = [resume_clean] + list(job_clean.values())
 
-    vectorizer = TfidfVectorizer(ngram_range=(1,2))
+    # TF-IDF
+    vectorizer = TfidfVectorizer(ngram_range=(1, 2))
     tfidf_matrix = vectorizer.fit_transform(documents)
 
     scores = {}
@@ -66,51 +71,56 @@ if uploaded_file:
         scores[role] = score
 
     sorted_scores = sorted(scores.items(), key=lambda x: x[1], reverse=True)
+
     threshold = 0.4
 
-    if sorted_scores:
-        top_score = sorted_scores[0][1]
-        if top_score >= threshold:
-            best_role = sorted_scores[0][0]
-        else:
-            best_role = None
+    # ---------------- BEST ROLE ---------------- #
+    if sorted_scores and sorted_scores[0][1] >= threshold:
+        best_role = sorted_scores[0][0]
     else:
         best_role = None
-st.header("Best Role")
 
-if best_role:
-    st.success(best_role)
-else:
-    st.error("No suitable role found")
-st.header("Top 3 Recommended Roles")
+    st.header("Best Role")
 
-top_3 = sorted_scores[:3]
+    if best_role:
+        st.success(best_role)
+    else:
+        st.error("No suitable role found")
 
-for i, (role, score) in enumerate(top_3, 1):
-    st.write(f"{i}. {role} ({round(score*100,2)}%)")
-if best_role:
-    score_percent = sorted_scores[0][1] * 100
-    st.header("Resume Score")
-    st.metric("Match Score", f"{round(score_percent,2)}%")
+    # ---------------- TOP 3 ROLES ---------------- #
+    st.header("Top 3 Recommended Roles")
 
-resume_words = set(resume_clean.split())
+    top_3 = sorted_scores[:3]
 
-st.header("Ranking")
+    for i, (role, score) in enumerate(top_3, 1):
+        st.write(f"{i}. {role} ({round(score*100,2)}%)")
 
-for i, (role, score) in enumerate(sorted_scores, 1):
-    st.progress(min(score, 1.0))
-    st.write(f"{i}. {role} ({round(score*100,2)}%)")
+    # ---------------- MATCH SCORE ---------------- #
+    if best_role:
+        score_percent = sorted_scores[0][1] * 100
+        st.header("Resume Score")
+        st.metric("Match Score", f"{round(score_percent,2)}%")
 
-if best_role in job_clean:
-    job_words = set(job_clean[best_role].split())
-else:
-    job_words = set()
+    # ---------------- FULL RANKING ---------------- #
+    st.header("Ranking")
 
-missing_skills = list(job_words - resume_words)[:5]
+    for i, (role, score) in enumerate(sorted_scores, 1):
+        st.progress(min(score, 1.0))
+        st.write(f"{i}. {role} ({round(score*100,2)}%)")
 
-st.header("Missing Skills")
+    # ---------------- MISSING SKILLS ---------------- #
+    resume_words = set(resume_clean.split())
 
-if missing_skills:
-    st.warning(", ".join(missing_skills))
-else:
-    st.success("No missing skills ")
+    if best_role in job_clean:
+        job_words = set(job_clean[best_role].split())
+    else:
+        job_words = set()
+
+    missing_skills = list(job_words - resume_words)[:5]
+
+    st.header("Missing Skills")
+
+    if missing_skills:
+        st.warning(", ".join(missing_skills))
+    else:
+        st.success("No missing skills 🎉")
