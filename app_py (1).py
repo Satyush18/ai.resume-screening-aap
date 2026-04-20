@@ -61,6 +61,7 @@ for i, role in enumerate(job_clean.keys()):
     score = cosine_similarity(tfidf_matrix[0], tfidf_matrix[i+1])[0][0]
     scores[role] = score
     sorted_scores = sorted(scores.items(), key=lambda x: x[1], reverse=True) 
+    
 threshold = 0.4
 
 if len(sorted_scores) > 0 and sorted_scores[0][1] >= threshold:
