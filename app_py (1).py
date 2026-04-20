@@ -49,12 +49,14 @@ uploaded_file = st.file_uploader("Upload Resume", type=["pdf"])
 if uploaded_file:
 
     # Dummy text extraction (replace later with PDF parser)
-    resume_text = uploaded_file.read().decode("latin-1", errors="ignore")
+ resume_text = extract_text(uploaded_file)
 
-    if not resume_text:
-        st.error("Could not read resume")
-        st.stop()
+if not resume_text.strip():
+    st.error("Could not read resume properly")
+    st.stop()
 
+# DEBUG (IMPORTANT)
+st.write("Resume Preview:", resume_text[:300])
     resume_clean = preprocess(resume_text)
 
     job_clean = {k: preprocess(v) for k, v in job_descriptions.items()}
