@@ -131,7 +131,7 @@ if uploaded_file:
     else:
         job_words = set()
 
-    missing_skills = [w for w in (job_words - resume_words) if len(w) > 3][:5]
+    missing_skills = [w for w in (job_words - resume_words) if len(w) > 2][:5]
     st.header("Missing Skills")
 
     if missing_skills:
