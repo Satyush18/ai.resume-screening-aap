@@ -6,34 +6,34 @@ import re
 from sklearn.metrics.pairwise import cosine_similarity
 from sentence_transformers import SentenceTransformer
 
-# ---------------- PAGE CONFIG ----------------
+# ------------------ PAGE CONFIG ------------------
 st.set_page_config(layout="wide")
 st.markdown("### Created by: Satyush Mohapatra")
 st.markdown("---")
 
-# ---------------- SKILLS DATABASE ----------------
+# ------------------ SKILLS DATABASE ------------------
 SKILLS_DB = {
     "Data Scientist": ["python", "machine learning", "pandas", "numpy", "statistics"],
     "Web Developer": ["html", "css", "javascript", "react", "node"],
     "Android Developer": ["java", "kotlin", "android", "firebase"],
     "DevOps Engineer": ["docker", "kubernetes", "aws", "ci/cd"],
     "Cyber Security": ["network security", "penetration testing", "encryption"],
-    "UI/UX Designer": ["figma", "wireframe", "prototyping", "design"],
+    "UI/UX Designer": ["figma", "wireframe", "prototype", "design"],
     "General Professional": ["communication", "teamwork", "leadership"]
 }
 
-# ---------------- LOAD MODEL ----------------
+# ------------------ LOAD MODEL ------------------
 @st.cache_resource
 def load_model():
     try:
         return SentenceTransformer("all-MiniLM-L6-v2")
     except Exception as e:
-        st.error(f"Model load failed: {e}")
+        st.error(f"Model loading failed: {e}")
         return None
 
 model = load_model()
 
-# ---------------- EXTRACT TEXT ----------------
+# ------------------ PDF TEXT EXTRACTION ------------------
 def extract_text(file):
     reader = PyPDF2.PdfReader(file)
     text = ""
@@ -42,12 +42,13 @@ def extract_text(file):
             text += page.extract_text()
     return text
 
-# ---------------- PREPROCESS ----------------
+# ------------------ PREPROCESS ------------------
 def preprocess(text):
     text = text.lower()
-    text = re.sub(r'[^a-z\s]', ' ', text)
-    text = re.sub(r'\s+', ' ', text)
+    text = re.sub(r"[^a-z\s]", " ", text)
+    text = re.sub(r"\s+", " ", text)
 
+    # normalize words
     text = text.replace("nodejs", "node")
     text = text.replace("reactjs", "react")
 
@@ -56,11 +57,12 @@ def preprocess(text):
 
     return " ".join(words)
 
-# ---------------- UI ----------------
+# ------------------ UI ------------------
 st.title("Resume Screening System")
+
 uploaded_file = st.file_uploader("Upload Resume", type=["pdf"])
 
-# ---------------- MAIN LOGIC ----------------
+# ------------------ MAIN LOGIC ------------------
 if uploaded_file:
 
     resume_text = extract_text(uploaded_file)
@@ -69,42 +71,55 @@ if uploaded_file:
         st.error("Could not read resume properly")
         st.stop()
 
-    st.subheader("Resume Preview")
-    st.write(resume_text[:500])
+    st.write("### Resume Preview")
+    st.write(resume_text[:300])
 
     resume_clean = preprocess(resume_text)
     resume_words = set(resume_clean.split())
 
+    # ------------------ MODEL CHECK ------------------
     if model is None:
-        st.error("Model not loaded")
+        st.error("Model not loaded properly")
         st.stop()
 
-    # ---------------- EMBEDDING ----------------
     try:
         resume_embedding = model.encode(resume_clean)
     except Exception as e:
         st.error(f"Encoding failed: {e}")
         st.stop()
 
-    # ---------------- SCORING ----------------
+    # ------------------ SCORING ------------------
     scores = {}
 
     for role, skills in SKILLS_DB.items():
+
         job_text = " ".join(skills)
-        job_clean = preprocess(job_text)
 
-        job_embedding = model.encode(job_clean)
+        try:
+            job_embedding = model.encode(job_text)
+        except Exception as e:
+            st.error(f"Job encoding failed: {e}")
+            st.stop()
 
-        score = cosine_similarity([resume_embedding], [job_embedding])[0][0]
-        scores[role] = float(score)   # 🔥 FIX: convert to float
+        score = cosine_similarity(
+            [resume_embedding],
+            [job_embedding]
+        )[0][0]
 
-    sorted_scores = sorted(scores.items(), key=lambda x: x[1], reverse=True)
+        scores[role] = score
 
-    # ---------------- BEST ROLE ----------------
+    # ------------------ SORT ------------------
+    sorted_scores = sorted(
+        scores.items(),
+        key=lambda x: x[1],
+        reverse=True
+    )
+
+    # ------------------ BEST ROLE ------------------
     best_role = None
-    threshold = 0.3
+    threshold = 0.2
 
-    if sorted_scores and sorted_scores[0][1] >= threshold:
+    if sorted_scores and sorted_scores[0][1] > threshold:
         best_role = sorted_scores[0][0]
 
     st.header("Best Role")
@@ -114,7 +129,7 @@ if uploaded_file:
     else:
         st.warning("No strong match found")
 
-    # ---------------- TOP 3 ----------------
+    # ------------------ TOP 3 ------------------
     st.header("Top 3 Recommended Roles")
 
     top_3 = sorted_scores[:3]
@@ -122,27 +137,24 @@ if uploaded_file:
     for i, (role, score) in enumerate(top_3, 1):
         st.write(f"{i}. {role} ({round(score*100,2)}%)")
 
-    # ---------------- MATCH SCORE ----------------
-    if best_role:
-        score_percent = sorted_scores[0][1] * 100
-        st.header("Resume Score")
-        st.metric("Match Score", f"{round(score_percent,2)}%")
+    # ------------------ RANKING ------------------
+    st.header("Ranking")
 
-    # ---------------- RANKING ----------------
-   st.header("Ranking")
+    for i, (role, score) in enumerate(sorted_scores, 1):
 
-for i, (role, score) in enumerate(sorted_scores, 1):
+        # ✅ FIXED: normalize score (-1 to 1 → 0 to 1)
+        normalized_score = (score + 1) / 2
 
-    # 🔥 FIX: Clamp value between 0 and 100
-    progress_value = int(max(0, min(score * 100, 100)))
+        progress_value = int(normalized_score * 100)
 
-    st.progress(progress_value)
-    st.write(f"{i}. {role} ({round(score*100,2)}%)")
+        st.progress(progress_value)
+        st.write(f"{i}. {role} ({round(score*100,2)}%)")
 
-    # ---------------- MISSING SKILLS ----------------
+    # ------------------ MISSING SKILLS ------------------
     st.header("Missing Skills")
 
     if best_role and best_role in SKILLS_DB:
+
         job_skills = SKILLS_DB[best_role]
         missing_skills = []
 
@@ -155,4 +167,4 @@ for i, (role, score) in enumerate(sorted_scores, 1):
         if missing_skills:
             st.warning(", ".join(missing_skills))
         else:
-            st.success("No missing skills 🎉")
+            st.success("No missing skills")
