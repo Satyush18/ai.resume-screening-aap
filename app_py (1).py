@@ -90,10 +90,11 @@ scores = {}
 
 for role, text in job_clean.items():
     try:
-    job_embedding = model.encode(text)
-except Exception as e:
-    st.error(f"Job encoding failed: {e}")
-    st.stop()
+        job_embedding = model.encode(text)
+    except Exception as e:
+        st.error(f"Job encoding failed: {e}")
+        st.stop()
+
     score = cosine_similarity([resume_embedding], [job_embedding])[0][0]
     scores[role] = score
 
