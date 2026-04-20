@@ -87,25 +87,24 @@ if uploaded_file:
         st.stop()
 scores = {}
 
-    for role, text in job_clean.items():
-        try:
-            job_embedding = model.encode(text)
-        except Exception as e:
-            st.error(f"Job encoding failed: {e}")
-            st.stop()
+for role, text in job_clean.items():
+    try:
+        job_embedding = model.encode(text)
+    except Exception as e:
+        st.error(f"Job encoding failed: {e}")
+        st.stop()
 
-        score = cosine_similarity([resume_embedding], [job_embedding])[0][0]
-        scores[role] = score
+    score = cosine_similarity([resume_embedding], [job_embedding])[0][0]
+    scores[role] = score
 
-    sorted_scores = sorted(scores.items(), key=lambda x: x[1], reverse=True)
+sorted_scores = sorted(scores.items(), key=lambda x: x[1], reverse=True)
 
-    threshold = 0.3
+threshold = 0.3
 
-    # ---------------- BEST ROLE ---------------- #
-    if sorted_scores and sorted_scores[0][1] >= threshold:
-        best_role = sorted_scores[0][0]
-    else:
-        best_role = None
+if sorted_scores and sorted_scores[0][1] >= threshold:
+    best_role = sorted_scores[0][0]
+else:
+    best_role = None
 
     st.header("Best Role")
 
