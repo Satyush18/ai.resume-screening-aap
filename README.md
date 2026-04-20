@@ -49,19 +49,19 @@ AI-Resume-Analyzer
 
  Screenshots
 
-🔹 Upload Interface
+ Upload Interface
 
 ![Upload](assets/upload.png)
 
-🔹 Resume Preview
+ Resume Preview
 
 ![Preview](assets/preview.png)
 
-🔹 Best Role Prediction
+ Best Role Prediction
 
 ![Result](assets/result.png)
 
-🔹 Missing Skills Detection
+ Missing Skills Detection
 
 ![Missing Skills](assets/missing_skills.png)
 
