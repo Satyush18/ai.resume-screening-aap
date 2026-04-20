@@ -51,19 +51,19 @@ AI-Resume-Analyzer
 
  Upload Interface
 
-"Upload" (assets/upload.png)
+
 
  Resume Preview
 
-"Preview" (assets/preview.png)
+
 
  Best Role Prediction
 
-"Result" (assets/result.png)
+
 
  Missing Skills Detection
 
-"Missing Skills" (assets/missing_skills.png)
+
 
 - PDF parsing may fail for complex or scanned resumes
 - No job description matching
