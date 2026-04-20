@@ -129,12 +129,15 @@ if uploaded_file:
         st.metric("Match Score", f"{round(score_percent,2)}%")
 
     # ---------------- RANKING ----------------
-    st.header("Ranking")
+   st.header("Ranking")
 
-    for i, (role, score) in enumerate(sorted_scores, 1):
-        progress_value = int(score * 100)   # 🔥 FIXED
-        st.progress(progress_value)
-        st.write(f"{i}. {role} ({round(score*100,2)}%)")
+for i, (role, score) in enumerate(sorted_scores, 1):
+
+    # 🔥 FIX: Clamp value between 0 and 100
+    progress_value = int(max(0, min(score * 100, 100)))
+
+    st.progress(progress_value)
+    st.write(f"{i}. {role} ({round(score*100,2)}%)")
 
     # ---------------- MISSING SKILLS ----------------
     st.header("Missing Skills")
