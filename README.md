@@ -2,6 +2,10 @@ AI Resume Analyzer
 
 An AI-powered resume analysis system that uses Natural Language Processing (NLP) and sentence embeddings to evaluate resumes, recommend suitable job roles, and identify missing skills.
 
+Live Demo
+
+https://ai-resume-analyzer-7uwmjhprkmhtwn96skzv27.streamlit.app/
+
  Model Used
 
 Sentence Transformers ("all-MiniLM-L6-v2")
