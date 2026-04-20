@@ -31,7 +31,7 @@ def preprocess(text):
     words = text.split()
     return " ".join(words)
 
-job_skills = {
+job_descriptions = {
     "Data Scientist": "Python machine learning pandas numpy statistics",
     "Web Developer": "HTML CSS JavaScript React Node",
     "Android Developer": "Java Kotlin Android Studio",
@@ -112,7 +112,7 @@ if uploaded_file:
     resume_words = set(resume_clean.split())
 
     if best_role in job_clean:
-        job_words = set(job_skills.get(best_role,[]))
+        job_words = set(job_descriptions.get(best_role,[]))
     else:
         job_words = set()
 
