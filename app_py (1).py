@@ -44,24 +44,32 @@ st.title("Resume Screening System")
 
 uploaded_file = st.file_uploader("Upload Resume", type=["pdf"])
 
+uploaded_file = st.file_uploader("Upload Resume", type=["pdf"])
+
 if uploaded_file:
+
     resume_text = extract_text(uploaded_file)
+
+    if not resume_text:
+        st.error("Could not read resume")
+        st.stop()
+
     resume_clean = preprocess(resume_text)
 
-    job_clean = {k: preprocess(v) for k,v in job_descriptions.items()}
+    job_clean = {k: preprocess(v) for k, v in job_descriptions.items()}
 
-documents = [resume_clean] + list(job_clean.values())
+    documents = [str(resume_clean)] + [str(v) for v in job_clean.values()]
 
-vectorizer = TfidfVectorizer(ngram_range=(1,2))
-tfidf_matrix = vectorizer.fit_transform(documents)
+    vectorizer = TfidfVectorizer(ngram_range=(1,2))
+    tfidf_matrix = vectorizer.fit_transform(documents)
 
-scores = {}
+    scores = {}
 
-for i, role in enumerate(job_clean.keys()):
-    score = cosine_similarity(tfidf_matrix[0], tfidf_matrix[i+1])[0][0]
-    scores[role] = score
-    sorted_scores = sorted(scores.items(), key=lambda x: x[1], reverse=True) 
-    
+    for i, role in enumerate(job_clean.keys()):
+        score = cosine_similarity(tfidf_matrix[0], tfidf_matrix[i+1])[0][0]
+        scores[role] = score
+
+    sorted_scores = sorted(scores.items(), key=lambda x: x[1], reverse=True)
 threshold = 0.4
 
 if len(sorted_scores) > 0 and sorted_scores[0][1] >= threshold:
