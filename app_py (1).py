@@ -28,7 +28,7 @@ def extract_text(file):
 def preprocess(text):
     text = text.lower()
     text = re.sub(r'[^a-z\s]', ' ', text)
-    words = [w for w in text.split() if w not in ENGLISH_STOP_WORDS]
+    words = text.split()
     return " ".join(words)
 
 job_descriptions = {
