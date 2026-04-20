@@ -26,8 +26,7 @@ SKILLS_DB = {
 @st.cache_resource
 def load_model():
     try:
-        model = SentenceTransformer("all-MiniLM-L6-v2")
-        return model
+        return SentenceTransformer("all-MiniLM-L6-v2")
     except Exception as e:
         st.error(f"Model load failed: {e}")
         return None
@@ -38,14 +37,12 @@ model = load_model()
 def extract_text(file):
     reader = PyPDF2.PdfReader(file)
     text = ""
-
     for page in reader.pages:
         if page.extract_text():
             text += page.extract_text()
-
     return text
 
-# ---------------- PREPROCESS TEXT ----------------
+# ---------------- PREPROCESS ----------------
 def preprocess(text):
     text = text.lower()
     text = re.sub(r'[^a-z\s]', ' ', text)
@@ -61,7 +58,6 @@ def preprocess(text):
 
 # ---------------- UI ----------------
 st.title("Resume Screening System")
-
 uploaded_file = st.file_uploader("Upload Resume", type=["pdf"])
 
 # ---------------- MAIN LOGIC ----------------
@@ -79,9 +75,8 @@ if uploaded_file:
     resume_clean = preprocess(resume_text)
     resume_words = set(resume_clean.split())
 
-    # ---------------- MODEL CHECK ----------------
     if model is None:
-        st.error("Model not loaded properly")
+        st.error("Model not loaded")
         st.stop()
 
     # ---------------- EMBEDDING ----------------
@@ -98,19 +93,15 @@ if uploaded_file:
         job_text = " ".join(skills)
         job_clean = preprocess(job_text)
 
-        try:
-            job_embedding = model.encode(job_clean)
-        except Exception as e:
-            st.error(f"Job encoding failed: {e}")
-            st.stop()
+        job_embedding = model.encode(job_clean)
 
         score = cosine_similarity([resume_embedding], [job_embedding])[0][0]
-        scores[role] = score
+        scores[role] = float(score)   # 🔥 FIX: convert to float
+
+    sorted_scores = sorted(scores.items(), key=lambda x: x[1], reverse=True)
 
     # ---------------- BEST ROLE ----------------
     best_role = None
-    sorted_scores = sorted(scores.items(), key=lambda x: x[1], reverse=True)
-
     threshold = 0.3
 
     if sorted_scores and sorted_scores[0][1] >= threshold:
@@ -134,15 +125,15 @@ if uploaded_file:
     # ---------------- MATCH SCORE ----------------
     if best_role:
         score_percent = sorted_scores[0][1] * 100
-
         st.header("Resume Score")
         st.metric("Match Score", f"{round(score_percent,2)}%")
 
-    # ---------------- FULL RANKING ----------------
+    # ---------------- RANKING ----------------
     st.header("Ranking")
 
     for i, (role, score) in enumerate(sorted_scores, 1):
-        st.progress(min(score, 1.0))
+        progress_value = int(score * 100)   # 🔥 FIXED
+        st.progress(progress_value)
         st.write(f"{i}. {role} ({round(score*100,2)}%)")
 
     # ---------------- MISSING SKILLS ----------------
