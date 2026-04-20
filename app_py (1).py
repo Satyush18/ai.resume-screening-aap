@@ -74,6 +74,7 @@ if uploaded_file:
     st.write("Resume Preview:", resume_text[:300])
 
     resume_clean = preprocess(resume_text)
+    resume_words = set(resume_clean.split())
 
     job_clean = {k: preprocess(v) for k, v in SKILLS_DB.items()}
 
@@ -139,8 +140,6 @@ if uploaded_file:
 
     # ---------------- MISSING SKILLS ---------------- #
 # MISSING SKILLS (AI CLEAN VERSION)
-
-resume_words = set(resume_clean.split())
 
 if best_role in SKILLS_DB:
     job_skills = SKILLS_DB[best_role]
